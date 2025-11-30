@@ -6,7 +6,7 @@ local CoreGui = game:GetService("CoreGui")
 local SoundService = game:GetService("SoundService")
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "jerkraper"
+ScreenGui.Name = "CheatMenu"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.DisplayOrder = 999999999
 ScreenGui.Parent = CoreGui
@@ -181,7 +181,7 @@ end
 Btn("Toggle Fly (F)", function() if Flying then StopFly() else StartFly() end end)
 Btn("Toggle Noclip", ToggleNoclip)
 Btn("Infinite Jump", function() InfJump = not InfJump SendNotif("Inf Jump", InfJump and "ON" or "OFF",2) end)
-Btn("Admin Commands", function() loadstring(game:HttpGet(https://raw.githubusercontent.com/JerkRaper552/TRjerkraper/refs/heads/main/floydlua?token=GHSAT0AAAAAADQKOV42YBZUNPQWXB633SVQ2JMUK4A"))() SendNotif("Admin","Floyd loaded",5) end)
+Btn("Admin Commands", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/JerkRaper552/TRjerkraper/refs/heads/main/floydlua?token=GHSAT0AAAAAADQKOV42LLFKGT6EAV3NE6EY2JMUORQ"))() SendNotif("Admin","Floyd loaded",5) end)
 
 -- Speed control
 local SpeedFrame = Instance.new("Frame")
