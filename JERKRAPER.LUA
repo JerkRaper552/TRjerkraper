@@ -1,3 +1,19 @@
+local mainSound = Instance.new("Sound")
+mainSound.SoundId = "rbxassetid://77507064833522"
+mainSound.Volume = 0.5
+mainSound.Pitch = 0.97
+mainSound.Parent = game:GetService("SoundService")
+
+local backgroundSound = Instance.new("Sound")
+backgroundSound.SoundId = "rbxassetid://9038268731"
+backgroundSound.Volume = 0.3 
+backgroundSound.Pitch = 1.01
+backgroundSound.Parent = game:GetService("SoundService")
+
+
+mainSound:Play()
+backgroundSound:Play() 
+
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
@@ -6,7 +22,7 @@ local CoreGui = game:GetService("CoreGui")
 local SoundService = game:GetService("SoundService")
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "CheatMenu"
+ScreenGui.Name = "ayoey"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.DisplayOrder = 999999999
 ScreenGui.Parent = CoreGui
@@ -29,14 +45,14 @@ local function SendNotif(ti, te, du)
     })
 end
 
-local VERSION = "v3.0"
+local VERSION = "v3.3"
 local Flying = false
 local Noclip = false
 local InfJump = false
 local FlyConnection, BodyVelocity, BodyGyro, NoclipConnection
 
 local TrollEnabled = false
-local TrollTarget = nil  -- Now stores the actual Player instance
+local TrollTarget = nil 
 local TrollConnection = nil
 
 local function GetChar() return Player.Character or Player.CharacterAdded:Wait() end
@@ -91,7 +107,7 @@ local function StartFly()
         if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then m -= Vector3.new(0,1,0) end
         BodyVelocity.Velocity = m.Magnitude > 0 and (m.Unit * s) or Vector3.zero
     end)
-    SendNotif("Fly","Enabled - F to toggle",3)
+    SendNotif("Fly","enabled, f to toggle",3)
 end
 
 local function StopFly()
@@ -203,7 +219,7 @@ Btn("Toggle Fly (F)", function() if Flying then StopFly() else StartFly() end en
 Btn("Toggle Noclip", ToggleNoclip)
 Btn("Infinite Jump", function() InfJump = not InfJump SendNotif("Inf Jump", InfJump and "ON" or "OFF",2) end)
 
--- === TROLL PLAYER WITH SEARCHABLE PLAYER LIST ===
+-- === TROLLING PLAYER(S) ===
 local TrollFrame = Instance.new("Frame")
 TrollFrame.Size = UDim2.new(1,-20,0,190) TrollFrame.BackgroundColor3 = Color3.fromRGB(45,45,60) TrollFrame.Parent = Scroll
 Instance.new("UICorner", TrollFrame).CornerRadius = UDim.new(0,10)
@@ -242,7 +258,6 @@ ToggleTrollBtn.TextColor3 = Color3.new(1,1,1) ToggleTrollBtn.Font = Enum.Font.Go
 ToggleTrollBtn.Parent = TrollFrame
 Instance.new("UICorner", ToggleTrollBtn).CornerRadius = UDim.new(0,8)
 
--- Update player list function
 local function UpdateTrollPlayerList()
     for _, v in pairs(PlayerListScroll:GetChildren()) do
         if v:IsA("TextButton") then v:Destroy() end
@@ -277,9 +292,8 @@ end
 SearchBox:GetPropertyChangedSignal("Text"):Connect(UpdateTrollPlayerList)
 Players.PlayerAdded:Connect(UpdateTrollPlayerList)
 Players.PlayerRemoving:Connect(UpdateTrollPlayerList)
-UpdateTrollPlayerList() -- Initial population
+UpdateTrollPlayerList()
 
--- Toggle Troll Button
 ToggleTrollBtn.MouseButton1Click:Connect(function()
     if not TrollTarget or not TrollTarget.Character or not TrollTarget.Character:FindFirstChild("HumanoidRootPart") then
         SendNotif("Troll", "No valid player selected!", 4)
@@ -287,7 +301,7 @@ ToggleTrollBtn.MouseButton1Click:Connect(function()
     end
 
     TrollEnabled = not TrollEnabled
-    ToggleTrollBtn.Text = TrollEnabled and "Stop Trolling (ON)" or "Start Trolling (OFF)"
+    ToggleTrollBtn.Text = TrollEnabled and "Quit Looptele (ON)" or "Start Looptele (OFF)"
     ToggleTrollBtn.BackgroundColor3 = TrollEnabled and Color3.fromRGB(50,180,50) or Color3.fromRGB(180,50,50)
 
     if TrollEnabled then
@@ -297,13 +311,13 @@ ToggleTrollBtn.MouseButton1Click:Connect(function()
             local hrp = GetHRP()
             local targetHRP = TrollTarget.Character and TrollTarget.Character:FindFirstChild("HumanoidRootPart")
             if hrp and targetHRP then
-                hrp.CFrame = targetHRP.CFrame * CFrame.new(0, -10, 0) -- Under them
+                hrp.CFrame = targetHRP.CFrame * CFrame.new(0, -10, 0) 
             end
         end)
-        SendNotif("Troll", "Now trolling "..TrollTarget.DisplayName.."!", 3)
+        SendNotif("Looptele", "Looping teleport for "..TrollTarget.DisplayName.."!", 3)
     else
         if TrollConnection then TrollConnection:Disconnect() TrollConnection = nil end
-        SendNotif("Troll", "Stopped trolling", 2)
+        SendNotif("Looptele", "Stopped looping teleport", 2)
     end
 end)
 
@@ -403,7 +417,7 @@ Players.PlayerAdded:Connect(UpdatePlayerList)
 Players.PlayerRemoving:Connect(UpdatePlayerList)
 
 RunService.Heartbeat:Connect(function()
-	if InfoLabel.Text ~= "Select a player for info" then
+	if InfoLabel.Text ~= "select a player for info" then
 		local name = InfoLabel.Text:match("Name: ([^\n]+)")
 		if name then
 			local p = Players:FindFirstChild(name)
@@ -421,4 +435,4 @@ Minimize.MouseButton1Click:Connect(function()
     MainFrame.Size = Content.Visible and UDim2.new(0,340,0,620) or UDim2.new(0,340,0,45)
 end)
 
-SendNotif("O_o_O "..VERSION,"Loaded successfully - Player Search & Troll features added!",6)
+SendNotif("O_o_O "..VERSION,"OoO loaded successfully, have fun.",6)
