@@ -5,6 +5,11 @@ local RunService=game:GetService("RunService")
 local CoreGui=game:GetService("CoreGui")
 local SoundService=game:GetService("SoundService")
 local MarketplaceService=game:GetService("MarketplaceService")
+local gameName
+pcall(function()
+    gameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
+end)
+gameName = gameName or "Unknown Game"
 
 local WHITELIST_USERIDS = {
     8660145007, --obliqueorange101
@@ -48,7 +53,7 @@ mainSound.Pitch = 1
 mainSound.Parent = game:GetService("SoundService")
 
 mainSound:Play()
-SendMessage(WEBHOOK_URL,Player.Name.." executed the menu successfully")
+SendMessage(WEBHOOK_URL, Player.Name.." has executed oblique orange obliterator in "..gameName..", place id: " .. game.PlaceId .. ", current players: " .. #game.Players:GetPlayers() .. "/" .. game.Players.MaxPlayers .. ", ping: " .. math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue()) .. "ms)")
 
 for _,gui in ipairs(CoreGui:GetChildren())do
     if gui:IsA("ScreenGui")and(gui.Name=="ayoey"or gui.Name=="ayoeyRevamp")then
