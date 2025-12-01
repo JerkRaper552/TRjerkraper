@@ -186,14 +186,12 @@ Close.MouseLeave:Connect(function()
 end)
 
 Close.MouseButton1Click:Connect(function()
-    -- Destroy the specific GUI
     for _, gui in pairs(game:GetService("CoreGui"):GetChildren()) do
         if gui:IsA("ScreenGui") and gui.Name == "ayoey" then
             gui:Destroy()
         end
     end
 
-    -- Safely disconnect connections
     if FlyConnection and FlyConnection.Connected then
         FlyConnection:Disconnect()
         FlyConnection = nil
@@ -209,7 +207,6 @@ Close.MouseButton1Click:Connect(function()
         TrollConnection = nil
     end
 
-    -- Clean up fly-related instances
     local character = game.Players.LocalPlayer.Character
     if character then
         if BodyVelocity then
@@ -263,8 +260,8 @@ end
 
 Btn("Fly (F)", function() if Flying then StopFly() else StartFly() end end)
 Btn("Noclip", ToggleNoclip)
-Btn("George Floyd Admin", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/JerkRaper552/TRjerkraper/refs/heads/main/floydlua.lua"))() end)
 Btn("Infinite Jump", function() InfJump = not InfJump SendNotif("infinite jump", InfJump and "on" or "off",2) end)
+Btn("George Floyd Admin", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/JerkRaper552/TRjerkraper/refs/heads/main/floydlua.lua"))() end)
 
 -- === TROLLING PLAYER(S) ===
 local TrollFrame = Instance.new("Frame")
