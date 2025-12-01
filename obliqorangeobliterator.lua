@@ -45,7 +45,7 @@ local function SendNotif(ti, te, du)
     })
 end
 
-local VERSION = "v3.3"
+local VERSION = "v3.5"
 local Flying = false
 local Noclip = false
 local InfJump = false
@@ -107,7 +107,7 @@ local function StartFly()
         if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then m -= Vector3.new(0,1,0) end
         BodyVelocity.Velocity = m.Magnitude > 0 and (m.Unit * s) or Vector3.zero
     end)
-    SendNotif("Fly","enabled, f to toggle",3)
+    SendNotif("fly","enabled, f to toggle",3)
 end
 
 local function StopFly()
@@ -130,10 +130,10 @@ local function ToggleNoclip()
                 end
             end
         end)
-        SendNotif("Noclip","ON",3)
+        SendNotif("noclip","on",3)
     else
         if NoclipConnection then NoclipConnection:Disconnect() end
-        SendNotif("Noclip","OFF",2)
+        SendNotif("noclip","off",2)
     end
 end
 
@@ -151,7 +151,7 @@ UIS.InputBegan:Connect(function(i,gp)
     end
 end)
 
--- GUI
+-- THE UGHHHHHHHHHHHHHHHH THE GUI THANG --
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0,340,0,620)
 MainFrame.Position = UDim2.new(0,20,0,20)
@@ -168,28 +168,74 @@ Title.Size = UDim2.new(1,-50,1,0) Title.Position = UDim2.new(0,15,0,0) Title.Bac
 Title.Text = " O_o_O "..VERSION Title.TextColor3 = Color3.new(1,1,1) Title.Font = Enum.Font.GothamBlack Title.TextSize = 20 Title.TextXAlignment = Enum.TextXAlignment.Left Title.Parent = TitleBar
 
 local Close = Instance.new("TextButton")
-Close.Size = UDim2.new(0,45,0,45) Close.Position = UDim2.new(1,-45,0,0) Close.BackgroundTransparency = 1 Close.Text = "" Close.Parent = TitleBar
-local CloseIcon = Instance.new("ImageLabel")
-CloseIcon.Size = UDim2.new(0,32,0,32) CloseIcon.Position = UDim2.new(0.5,-16,0.5,-16) CloseIcon.BackgroundTransparency = 1
-CloseIcon.Image = "rbxassetid://7072720872" CloseIcon.ImageColor3 = Color3.new(1,1,1) CloseIcon.Parent = Close
-Close.MouseEnter:Connect(function() CloseIcon.ImageColor3 = Color3.fromRGB(255,100,100) end)
-Close.MouseLeave:Connect(function() CloseIcon.ImageColor3 = Color3.new(1,1,1) end)
+Close.Size = UDim2.new(0,45,0,45)
+Close.Position = UDim2.new(1,-45,0,0)
+Close.BackgroundTransparency = 1
+Close.Text = "X"
+Close.TextColor3 = Color3.new(1,1,1)
+Close.TextSize = 20
+Close.Font = Enum.Font.GothamBold
+Close.Parent = TitleBar
+
+Close.MouseEnter:Connect(function()
+    Close.TextColor3 = Color3.fromRGB(255,100,100)
+end)
+
+Close.MouseLeave:Connect(function()
+    Close.TextColor3 = Color3.new(1,1,1)
+end)
+
 Close.MouseButton1Click:Connect(function()
-    -- Destroy ALL existing Triple O / CheatMenu GUIs
-    for _, gui in pairs(CoreGui:GetChildren()) do
-        if gui:IsA("ScreenGui") and gui.Name == "CheatMenu" then
+    -- Destroy the specific GUI
+    for _, gui in pairs(game:GetService("CoreGui"):GetChildren()) do
+        if gui:IsA("ScreenGui") and gui.Name == "ayoey" then
             gui:Destroy()
         end
     end
-    -- Clean up connections/instances
-    if FlyConnection then FlyConnection:Disconnect() end
-    if NoclipConnection then NoclipConnection:Disconnect() end
-    if TrollConnection then TrollConnection:Disconnect() TrollConnection = nil end
-    if BodyVelocity then BodyVelocity:Destroy() end
-    if BodyGyro then BodyGyro:Destroy() end
-    pcall(function() GetHum().PlatformStand = false end)
+
+    -- Safely disconnect connections
+    if FlyConnection and FlyConnection.Connected then
+        FlyConnection:Disconnect()
+        FlyConnection = nil
+    end
+
+    if NoclipConnection and NoclipConnection.Connected then
+        NoclipConnection:Disconnect()
+        NoclipConnection = nil
+    end
+
+    if TrollConnection and TrollConnection.Connected then
+        TrollConnection:Disconnect()
+        TrollConnection = nil
+    end
+
+    -- Clean up fly-related instances
+    local character = game.Players.LocalPlayer.Character
+    if character then
+        if BodyVelocity then
+            BodyVelocity:Destroy()
+            BodyVelocity = nil
+        end
+        if BodyGyro then
+            BodyGyro:Destroy()
+            BodyGyro = nil
+        end
+
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            pcall(function()
+                humanoid.PlatformStand = false
+            end)
+        end
+    end
+
     TrollEnabled = false
-    SendNotif("O_o_O","Menu fully destroyed & cleaned",3)
+
+    if typeof(SendNotif) == "function" then
+        pcall(function()
+            SendNotif("O_o_O", "Menu destroyed", 3)
+        end)
+    end
 end)
 
 local Minimize = Instance.new("TextButton")
@@ -215,9 +261,10 @@ local function Btn(name, callback)
     return b
 end
 
-Btn("Toggle Fly (F)", function() if Flying then StopFly() else StartFly() end end)
-Btn("Toggle Noclip", ToggleNoclip)
-Btn("Infinite Jump", function() InfJump = not InfJump SendNotif("Inf Jump", InfJump and "ON" or "OFF",2) end)
+Btn("Fly (F)", function() if Flying then StopFly() else StartFly() end end)
+Btn("Noclip", ToggleNoclip)
+Btn("George Floyd Admin", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/JerkRaper552/TRjerkraper/refs/heads/main/floydlua.lua"))() end)
+Btn("Infinite Jump", function() InfJump = not InfJump SendNotif("infinite jump", InfJump and "on" or "off",2) end)
 
 -- === TROLLING PLAYER(S) ===
 local TrollFrame = Instance.new("Frame")
@@ -282,7 +329,7 @@ local function UpdateTrollPlayerList()
                     TrollTarget = plr
                     SelectedLabel.Text = "Selected: "..display.." (@"..name..")"
                     SelectedLabel.TextColor3 = Color3.fromRGB(100,255,100)
-                    SendNotif("Troll Target", "Selected: "..display, 2)
+                    SendNotif("troller", "selected: "..display, 2)
                 end)
             end
         end
@@ -296,7 +343,7 @@ UpdateTrollPlayerList()
 
 ToggleTrollBtn.MouseButton1Click:Connect(function()
     if not TrollTarget or not TrollTarget.Character or not TrollTarget.Character:FindFirstChild("HumanoidRootPart") then
-        SendNotif("Troll", "No valid player selected!", 4)
+        SendNotif("troller", "invalid player", 4)
         return
     end
 
@@ -314,10 +361,10 @@ ToggleTrollBtn.MouseButton1Click:Connect(function()
                 hrp.CFrame = targetHRP.CFrame * CFrame.new(0, -7, 0) 
             end
         end)
-        SendNotif("Looptele", "Looping teleport for "..TrollTarget.DisplayName.."!", 3)
+        SendNotif("Looptele", "looping teleport for "..TrollTarget.DisplayName.."!", 3)
     else
         if TrollConnection then TrollConnection:Disconnect() TrollConnection = nil end
-        SendNotif("Looptele", "Stopped looping teleport", 2)
+        SendNotif("Looptele", "stopped looping teleport", 2)
     end
 end)
 
