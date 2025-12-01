@@ -3,7 +3,7 @@ mainSound.SoundId = "rbxassetid://77507064833522"
 mainSound.Volume = 0.5
 mainSound.Pitch = 0.97
 mainSound.Parent = game:GetService("SoundService")
-
+ 
 local backgroundSound = Instance.new("Sound")
 backgroundSound.SoundId = "rbxassetid://9038268731"
 backgroundSound.Volume = 0
