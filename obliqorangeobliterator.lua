@@ -168,8 +168,8 @@ local function ToggleMaterialAura()
             if Player.Character then
                 for _,v in pairs(Player.Character:GetDescendants())do
                     if v:IsA("BasePart")then
-                        v.Material=Enum.Material.Plastic
-                        v.Color=Color3.fromRGB(255,255,255)
+                        v.Material=Enum.Material.Neon
+                        v.Color=Color3.fromRGB(255,0,0)
                     end
                 end
             end
