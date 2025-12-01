@@ -69,7 +69,7 @@ ScreenGui.Parent=CoreGui
 
 local NOTIF_ICON="rbxassetid://72464791211818"
 local NOTIF_SOUND=2483029612
-local VERSION="v4.5"
+local VERSION="v4.3"
 
 local config={
     FlySpeed=120,
@@ -168,8 +168,8 @@ local function ToggleMaterialAura()
             if Player.Character then
                 for _,v in pairs(Player.Character:GetDescendants())do
                     if v:IsA("BasePart")then
-                        v.Material=Enum.Material.Plastic
-                        v.Color=Color3.fromRGB(255,255,255)
+                        v.Material=Enum.Material.Neon
+                        v.Color=Color3.fromRGB(255,0,0)
                     end
                 end
             end
