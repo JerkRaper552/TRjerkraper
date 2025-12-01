@@ -311,7 +311,7 @@ ToggleTrollBtn.MouseButton1Click:Connect(function()
             local hrp = GetHRP()
             local targetHRP = TrollTarget.Character and TrollTarget.Character:FindFirstChild("HumanoidRootPart")
             if hrp and targetHRP then
-                hrp.CFrame = targetHRP.CFrame * CFrame.new(0, -10, 0) 
+                hrp.CFrame = targetHRP.CFrame * CFrame.new(0, -7, 0) 
             end
         end)
         SendNotif("Looptele", "Looping teleport for "..TrollTarget.DisplayName.."!", 3)
