@@ -1,6 +1,3 @@
---[[
-	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
-]]
 -- PLAYER INFO GRABBER
 -- IF IT SAYS IN CONSOLE HUMANOIDROOTPART DOENST EXIST THEN ITS BECAUSE THE USER IS USING AN ANIMATION SCRIPT
 
