@@ -1,7 +1,3 @@
--- Fake Exploit Menu GUI with Custom Background (Completely Safe - For Content/Trolling/Fun Only)
--- Background: rbxassetid://114018464243737
--- Made with love for Roblox Studio creators <3
-
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -33,7 +29,7 @@ backgroundImage.Size = UDim2.new(1, 0, 1, 0)
 backgroundImage.Position = UDim2.new(0, 0, 0, 0)
 backgroundImage.BackgroundTransparency = 1
 backgroundImage.ZIndex = -1
-backgroundImage.Image = "rbxassetid://114018464243737"
+backgroundImage.Image = "rbxassetid://88169826967819"
 backgroundImage.ScaleType = Enum.ScaleType.Tile  -- Tiled for seamless background (change to Stretch/Crop if preferred)
 backgroundImage.TileSize = UDim2.new(0, 128, 0, 128)  -- Adjust tile size for better fit (optional)
 backgroundImage.Parent = mainFrame
@@ -187,7 +183,7 @@ end)
 -- Toggle GUI with Insert key
 local open = false
 UserInputService.InputBegan:Connect(function(input)
-	if input.KeyCode == Enum.KeyCode.Insert then
+	if input.KeyCode == Enum.KeyCode.F then
 		open = not open
 		mainFrame.Visible = open
 		
