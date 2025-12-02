@@ -231,6 +231,54 @@ local function ToggleMaterialAura()
         SendNotif("Material Aura","Disabled",2)
     end
 end
+local TrollerTarget = nil
+local TrollerConnection = nil
+local TrollerAnim = nil
+
+local function StartTroller(targetPlayer)
+    if TrollerConnection then TrollerConnection:Disconnect() end
+    if TrollerAnim then TrollerAnim:Stop() TrollerAnim = nil end
+    
+    TrollerTarget = targetPlayer
+    local hrp = GetHRP()
+    local hum = GetHum()
+    if not hrp or not hum then return end
+
+    Noclip = true
+    if NoclipConnection then NoclipConnection:Disconnect() end
+    NoclipConnection = RunService.Stepped:Connect(function()
+        pcall(function()
+            for _, v in pairs(Player.Character:GetDescendants()) do
+                if v:IsA("BasePart") and v.CanCollide then
+                    v.CanCollide = false
+                end
+            end
+        end)
+    end)
+
+    local anim = Instance.new("Animation")
+    anim.AnimationId = "rbxassetid://70911189822313"
+    TrollerAnim = hum:LoadAnimation(anim)
+    TrollerAnim:Play()
+    TrollerAnim.Looped = true
+
+    TrollerConnection = RunService.Heartbeat:Connect(function()
+        if not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            return
+        end
+        local targetHRP = targetPlayer.Character.HumanoidRootPart
+        hrp.CFrame = targetHRP.CFrame * CFrame.new(0, -7, 0)
+    end)
+
+    SendNotif("Troller", "Now trolling under " .. targetPlayer.DisplayName, 4)
+end
+
+local function StopTroller()
+    if TrollerConnection then TrollerConnection:Disconnect() TrollerConnection = nil end
+    if TrollerAnim then TrollerAnim:Stop() TrollerAnim = nil end
+    TrollerTarget = nil
+    SendNotif("Troller", "Stopped", 2)
+end
 
 local function StartFly()
     if Flying then return end
@@ -423,12 +471,18 @@ Scrolling.Position=UDim2.new(0,10,0,10)
 Scrolling.BackgroundTransparency=1
 Scrolling.ScrollBarThickness=6
 Scrolling.ScrollBarImageColor3=Color3.fromRGB(255,140,0)
-Scrolling.CanvasSize=UDim2.new(0,0,0,0)
+Scrolling.AutomaticCanvasSize = Enum.AutomaticSize.Y
+Scrolling.ScrollingEnabled = true
+Scrolling.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
+Scrolling.CanvasSize = UDim2.new(0, 0, 0, 0)
 Scrolling.Parent=Content
 
 local Layout=Instance.new("UIListLayout",Scrolling)
 Layout.Padding=UDim.new(0,16)
 Layout.HorizontalAlignment=Enum.HorizontalAlignment.Center
+Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    Scrolling.CanvasSize = UDim2.new(0, 0, 0, Layout.AbsoluteContentSize.Y + 20)
+end)
 
 Minimize.MouseButton1Click:Connect(function()
     Content.Visible=not Content.Visible
@@ -441,7 +495,6 @@ local function Clear()
     for _,v in ipairs(Scrolling:GetChildren())do
         if not v:IsA("UIListLayout")then v:Destroy()end
     end
-    Scrolling.CanvasSize=UDim2.new(0,0,0,0)
 end
 
 local function Switch(tab,hl)
@@ -574,11 +627,10 @@ local function LoadHome()
     srvInfo.Font=Enum.Font.Gotham
     srvInfo.TextXAlignment=Enum.TextXAlignment.Left
     srvInfo.TextYAlignment=Enum.TextYAlignment.Top
-    Scrolling.CanvasSize=UDim2.new(0,0,0,520)
 end
 
 local function LoadExploits()
-    local movement=Section("Movement",450)
+    local movement=Section("Movement",720)
     local movementContainer = CreateButtonContainer(movement, 3)
 
     Button(movementContainer,"Fly (F)",function()
@@ -607,7 +659,87 @@ local function LoadExploits()
     end)
     infJumpBtn.MouseEnter:Connect(function()if not InfJump then infJumpBtn.BackgroundColor3 = Color3.fromRGB(50,50,65)end end)
     infJumpBtn.MouseLeave:Connect(function()if not InfJump then infJumpBtn.BackgroundColor3 = Color3.fromRGB(35,35,45)end end)
+local trollerFrame = Instance.new("Frame")
+    trollerFrame.Size = UDim2.new(1, -20, 0, 240)
+    trollerFrame.Position = UDim2.new(0, 10, 0, 360)
+    trollerFrame.BackgroundColor3 = Color3.fromRGB(35,35,45)
+    trollerFrame.Parent = movement
+    local tc = Instance.new("UICorner", trollerFrame)
+    tc.CornerRadius = UDim.new(0,10)
 
+    local trollerTitle = Instance.new("TextLabel")
+    trollerTitle.Size = UDim2.new(1,0,0,40)
+    trollerTitle.BackgroundTransparency = 1
+    trollerTitle.Text = ""
+    trollerTitle.TextColor3 = Color3.fromRGB(255,140,0)
+    trollerTitle.Font = Enum.Font.GothamBold
+    trollerTitle.TextSize = 18
+    trollerTitle.Parent = trollerFrame
+
+    local searchBox = Instance.new("TextBox")
+    searchBox.Size = UDim2.new(1, -20, 0, 35)
+    searchBox.Position = UDim2.new(0,10,0,45)
+    searchBox.PlaceholderText = "Search players..."
+    searchBox.Text = ""
+    searchBox.BackgroundColor3 = Color3.fromRGB(25,25,35)
+    searchBox.TextColor3 = Color3.new(1,1,1)
+    searchBox.Parent = trollerFrame
+    local sc = Instance.new("UICorner", searchBox)
+    sc.CornerRadius = UDim.new(0,8)
+
+    local playerList = Instance.new("ScrollingFrame")
+    playerList.Size = UDim2.new(1, -20, 0, 140)
+    playerList.Position = UDim2.new(0,10,0,90)
+    playerList.BackgroundTransparency = 1
+    playerList.ScrollBarThickness = 4
+    playerList.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    playerList.ScrollingEnabled = true
+    playerList.Parent = trollerFrame
+    local plLayout = Instance.new("UIListLayout", playerList)
+    plLayout.Padding = UDim.new(0,4)
+
+    local function updatePlayerList(filter)
+        for _,v in ipairs(playerList:GetChildren()) do
+            if v:IsA("TextButton") then v:Destroy() end
+        end
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= Player and (not filter or string.find(string.lower(plr.DisplayName.."@"..plr.Name), string.lower(filter))) then
+                local btn = Instance.new("TextButton")
+                btn.Size = UDim2.new(1,0,0,36)
+                btn.BackgroundColor3 = Color3.fromRGB(45,45,55)
+                btn.Text = plr.DisplayName .. " (@" .. plr.Name .. ")"
+                btn.TextColor3 = Color3.new(1,1,1)
+                btn.Font = Enum.Font.Gotham
+                btn.TextSize = 14
+                btn.Parent = playerList
+
+                local bc = Instance.new("UICorner", btn)
+                bc.CornerRadius = UDim.new(0,6)
+
+                btn.MouseButton1Click:Connect(function()
+                    if TrollerTarget == plr then
+                        StopTroller()
+                        btn.BackgroundColor3 = Color3.fromRGB(45,45,55)
+                    else
+                        StartTroller(plr)
+                        for _, b in ipairs(playerList:GetChildren()) do
+                            if b:IsA("TextButton") then
+                                b.BackgroundColor3 = Color3.fromRGB(45,45,55)
+                            end
+                        end
+                        btn.BackgroundColor3 = Color3.fromRGB(255,100,100)
+                    end
+                end)
+            end
+        end
+    end
+
+    searchBox:GetPropertyChangedSignal("Text"):Connect(function()
+        updatePlayerList(searchBox.Text)
+    end)
+    Players.PlayerAdded:Connect(function() updatePlayerList(searchBox.Text) end)
+    Players.PlayerRemoving:Connect(function() updatePlayerList(searchBox.Text) end)
+    updatePlayerList("")
     local speedF = Instance.new("Frame", movement)
     speedF.Size = UDim2.new(1, -20, 0, 80)
     speedF.Position = UDim2.new(0, 10, 0, 300)
@@ -710,8 +842,8 @@ local function LoadExploits()
         end
     end)
 
-    local fun = Section("Fun Exploits", 240)
-    local funContainer = CreateButtonContainer(fun, 3)
+    local fun = Section("Fun Exploits", 600)
+    local funContainer = CreateButtonContainer(fun, 6)
     Button(funContainer,"Infinite Yield",function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
         SendNotif("Infinite Yield", "Loaded!", 3)
@@ -724,16 +856,18 @@ local function LoadExploits()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/exxtremestuffs/SimpleSpySource/master/SimpleSpy.lua"))()
         SendNotif("Simple Spy", "Loaded!", 3)
     end)
-    Button(funContainer,"Trench warfare script",function()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/KGuestCheatsJ2/Sc/refs/heads/main/TrenchV2"))()
-        SendNotif("TrenchV2", "Loaded!", 3)
+    Button(funContainer,"murder mystery script",function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/JerkRaper552/TRjerkraperaddons/refs/heads/main/mm2.lua"))()
+        SendNotif("mm2", "Loaded!", 3)
     end)
-    Button(funContainer,"Simple Spy",function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/exxtremestuffs/SimpleSpySource/master/SimpleSpy.lua"))()
-        SendNotif("Simple Spy", "Loaded!", 3)
+    Button(funContainer,"remote firer",function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/JerkRaper552/TRjerkraperaddons/refs/heads/main/remotefirer.lua"))()
+        SendNotif("remote firer", "Loaded!", 3)
     end)
-
-    Scrolling.CanvasSize = UDim2.new(0,0,0,1000)
+    Button(funContainer,"Fates Admin",function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/fatesc/fates-admin/main/main.lua"))()
+        SendNotif("Fates Admin", "Loaded!", 3)
+    end)
 end
 
 local function LoadInfo()
@@ -763,8 +897,6 @@ local function LoadInfo()
     si.Font=Enum.Font.Gotham
     si.TextXAlignment=Enum.TextXAlignment.Left
     si.TextYAlignment=Enum.TextYAlignment.Top
-
-    Scrolling.CanvasSize=UDim2.new(0,0,0,500)
 end
 
 local function LoadSettings()
@@ -836,8 +968,6 @@ local function LoadSettings()
             end
         end
     end)
-
-    Scrolling.CanvasSize=UDim2.new(0,0,0,380)
 end
 
 HomeBtn.MouseButton1Click:Connect(function()Switch("Home",HomeHL)LoadHome()end)
